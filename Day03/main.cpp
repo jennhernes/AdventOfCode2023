@@ -2,18 +2,14 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <array>
+#include <sstream>
 
 struct Gear
 {
     int x{};
     int y{};
-
-    Gear(int x, int y)
-            : x{x}, y{y}
-    {}
-
-    int num1{-1};
-    int num2{-1};
+    std::array<int, 2> nums{-1, -1};
 };
 
 int main()
@@ -24,16 +20,12 @@ int main()
     while (getline(file, line))
     {
         if (line.empty()) continue;
-        std::vector<char> v{};
-        for (auto c: line)
-        {
-            v.push_back(c);
-        }
-        schematic.push_back(v);
+        schematic.emplace_back(line.begin(), line.end());
     }
 
     int total{};
     std::vector<Gear> gears{};
+    std::stringstream ss;
     for (int i{}; i < schematic.size(); ++i)
     {
         for (int j{}; j < schematic[i].size(); ++j)
@@ -42,16 +34,20 @@ int main()
             {
                 int n{schematic[i][j] - '0'};
                 int left = j;
-                int right = j;
                 while (j + 1 < schematic[i].size() && isdigit(schematic[i][j + 1]))
                 {
                     n = n * 10 + (schematic[i][j + 1] - '0');
-                    right = ++j;
+                    ++j;
                 }
+                int right = j;
                 bool valid{false};
-                for (int y{std::max(0, i - 1)}; y < std::min(static_cast<int>(schematic.size()), i + 2); ++y)
+                for (int y{std::max(0, i - 1)};
+                     y < std::min(static_cast<int>(schematic.size()), i + 2);
+                     ++y)
                 {
-                    for (int x{std::max(0, left - 1)}; x < std::min(static_cast<int>(schematic[i].size()), right + 2); ++x)
+                    for (int x{std::max(0, left - 1)};
+                         x < std::min(static_cast<int>(schematic[i].size()), right + 2);
+                         ++x)
                     {
                         if (!valid && !isdigit(schematic[y][x]) && schematic[y][x] != '.')
                         {
@@ -61,18 +57,21 @@ int main()
 
                         if (schematic[y][x] == '*')
                         {
-                            auto is_gear = [&](Gear &g) { return g.x == x && g.y == y; };
-                            int gIndex{static_cast<int>(std::find_if(gears.begin(), gears.end(), is_gear) - gears.begin())};
+                            auto is_gear = [&](const Gear& g) { return g.x == x && g.y == y; };
+                            int gIndex{
+                                static_cast<int>(std::find_if(gears.begin(), gears.end(), is_gear)
+                                                 - gears.begin())
+                            };
                             if (gIndex == gears.size())
                             {
                                 gears.emplace_back(x, y);
                             }
-                            if (gears[gIndex].num1 == -1)
+                            if (gears[gIndex].nums[0] == -1)
                             {
-                                gears[gIndex].num1 = n;
+                                gears[gIndex].nums[0] = n;
                             } else
                             {
-                                gears[gIndex].num2 = n;
+                                gears[gIndex].nums[1] = n;
                             }
                         }
                     }
@@ -84,10 +83,10 @@ int main()
     int ratios{};
     for (auto g: gears)
     {
-        if (g.num1 > -1 && g.num2 > -1)
+        if (g.nums[0] > -1 && g.nums[1] > -1)
         {
-            ratios += g.num1 * g.num2;
+            ratios += g.nums[0] * g.nums[1];
         }
     }
-    std::cout << total << " " << ratios << std::endl;
+    std::cout << total << " " << ratios << '\n';
 }
