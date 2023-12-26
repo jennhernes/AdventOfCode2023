@@ -1,45 +1,47 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 int main()
 {
     std::ifstream file{"../input.txt"};
-
     std::string line;
-    std::vector<int> cardCopies {0};
+    std::vector<int> cardCopies{0};
     std::vector<int> winning{};
     int total{};
-    
-    std::string tmp;
+
     int currentCard;
     int cardValue;
     int numWinningNumbers;
     int n;
-    int totalCopies;// first card is at index 1
+    int totalCopies; // first card is at index 1
+    std::stringstream ss;
     while (getline(file, line))
     {
         if (line.empty()) continue;
 
-        std::stringstream ss{line};
-        ss >> tmp; // skip card
-        ss >> tmp;
-        currentCard = stoi(tmp.substr(0, tmp.size() - 1));
+        ss.clear();
+        ss << line;
+        ss >> line; // skip card
+        ss >> line;
+        currentCard = stoi(line.substr(0, line.size() - 1));
         if (cardCopies.size() <= currentCard) cardCopies.push_back(0);
         cardCopies[currentCard]++;
         winning.clear();
-        while (ss >> tmp)
+        while (ss >> line)
         {
-            if (tmp == "|") break;
-            winning.push_back(std::stoi(tmp));
+            if (line == "|") break;
+            winning.push_back(std::stoi(line));
         }
         cardValue = 0;
         numWinningNumbers = 0;
-        while (ss >> tmp)
+        while (ss >> line)
         {
-            n = std::stoi(tmp);
-            auto pos = std::ranges::find(winning, n) - winning.begin();
-            if (pos != winning.size())
+            n = std::stoi(line);
+            auto pos = std::find(winning.begin(), winning.end(), n);
+            if (pos != winning.end())
             {
                 ++numWinningNumbers;
                 cardValue = cardValue == 0 ? 1 : cardValue * 2;
