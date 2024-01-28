@@ -85,6 +85,7 @@ int main()
 
     std::cout << length / 2 << '\n';
 
+    // scanline algorithm
     int previousCorner{};
     bool inRegion;
     int total{};
